@@ -149,9 +149,10 @@ const createDB = async (connection) => {
                 
                 // Tableau pour stocker les paires commande-produit
                 const orderList = [];
-
-                const commands = await connection.query(`SELECT * FROM commands`)
-                const products = await connection.query(`SELECT * FROM products`)
+                const commands = '';
+                const products = '';
+                await connection.query(`SELECT * FROM commands` , (error, results, fields) => {commands = results})
+                await connection.query(`SELECT * FROM products` , (error, results, fields) => {products = results})
                 
                 // Associer aléatoirement à une commande un produit
                 for (let i = 0; i < 10; i++) {
