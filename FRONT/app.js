@@ -1,26 +1,26 @@
 const express = require('express');
-const mysql = require('mysql');
+// const mysql = require('mysql');
 const app = express();
 const bodyParser = require('body-parser');
 
-app.listen(3000, () => {
+app.listen(3000, 'localhost', () => {
     console.log('Server is running on port 3000');
 });
 
 
-// Configuration de la base de données
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'database'
-});
+// // Configuration de la base de données
+// const connection = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: 'password',
+//     database: 'database'
+// });
 
-// Connexion à la base de données
-connection.connect((err) => {
-    if (err) throw err;
-    console.log('Connexion réussi');
-});
+// // Connexion à la base de données
+// connection.connect((err) => {
+//     if (err) throw err;
+//     console.log('Connexion réussi');
+// });
 
 //INSCRIPTION//
 //----------------------------------------------------------//
