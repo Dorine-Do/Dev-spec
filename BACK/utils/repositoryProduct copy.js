@@ -3,7 +3,7 @@
 // Get  ----------------------------------------------------------------------------------------------------------------------------
 const getById = async (connection, productId) => {
     return new Promise((resolve, reject) => {
-        connection.query(`SELECT * FROM product WHERE id = ?`, [productId], (error, results, fields) => {
+        connection.query(`SELECT * FROM Product WHERE id = ?`, [productId], (error, results, fields) => {
        
             if (error) {
                 console.error('Erreur lors de la récupération du produit par son ID :', error);
@@ -26,7 +26,7 @@ const getById = async (connection, productId) => {
 
 const getAllProducts = async (connection) => {
     return new Promise((resolve, reject) => {
-        connection.query(`SELECT * FROM product`, (error, results, fields) => {
+        connection.query(`SELECT * FROM Product`, (error, results, fields) => {
        
             if (error) {
                 console.error('Erreur lors de la récupération des produits :', error);
@@ -49,7 +49,7 @@ const getAllProducts = async (connection) => {
 const createProduct = async (connection, datas) => {
     return new Promise((resolve, reject) => {
         connection.query(`
-        INSERT INTO (name, description, price, images) 
+        INSERT INTO Product (name, description, price, images) 
         VALUES (${datas.name},${datas.description},${datas.price},${datas.images} )`, 
         (error, results, fields) => {
        
@@ -70,7 +70,7 @@ const updateProductById = async (connection, datas, productId) => {
     return new Promise((resolve, reject) => {
 
         // Construit le requête SQL
-        const baseSQL = `UPDATE product SET `;
+        const baseSQL = `UPDATE Product SET `;
         const paramsSQL = [];
         datas.forEach(element => {
               const keys = Object.keys(element);
@@ -87,7 +87,7 @@ const updateProductById = async (connection, datas, productId) => {
                 res.status(500).json({ message: 'Erreur lors de la mise à jour du produit par son ID' });
                 return;
             }else{
-                res.status(200).json({ message: 'Produit créé' });
+                res.status(200).json({ message: 'Produit mise à jour' });
             }
         })
     })
@@ -97,13 +97,13 @@ const updateProductById = async (connection, datas, productId) => {
 const deleteProductById = async (connection,productId) => {
 
     return new Promise((resolve, reject) => {
-        connection.query(`DELETE FROM product WHERE id = ?`, [productId] , (error, results, fields) => {
+        connection.query(`DELETE FROM Product WHERE id = ?`, [productId] , (error, results, fields) => {
             if (error) {
                 console.error('Erreur lors de la suppression du produit par son ID :', error);
                 res.status(500).json({ message: 'Erreur lors de la suppression du produit par son ID' });
                 return;
             }else{
-                res.status(200).json({ message: 'Produit créé' });
+                res.status(200).json({ message: 'Produit suprimme' });
             }
         })
     })

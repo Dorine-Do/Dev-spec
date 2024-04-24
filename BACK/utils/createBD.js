@@ -140,10 +140,10 @@ const createDB = async (connection) => {
                     CREATE TABLE ${expectTable} (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         quantity INT NOT NULL,      
-                        CommandId int,
-                        FOREIGN KEY (CommandId) REFERENCES User(CommandId)
-                        ProductId int,
-                        FOREIGN KEY (ProductId) REFERENCES User(ProductId)                     
+                        commandId int,
+                        FOREIGN KEY (commandId) REFERENCES User(commandId)
+                        productId int,
+                        FOREIGN KEY (productId) REFERENCES User(productId)                     
                     )
                 `
                 
