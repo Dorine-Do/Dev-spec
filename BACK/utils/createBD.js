@@ -1,18 +1,5 @@
 const faker = require('@faker-js/faker')
 
-
-const randomUser = () => {
-    return {
-        fakeFirstname: faker.name.firstName(),
-        fakeLastname: faker.name.lastName(),
-        isAdmin: 0,
-        password: generatePassword(),
-        fakeEmail: faker.internet.email(),
-        fakeAdress: faker.address.streetAddress(),
-        fakePhone: faker.phone.phoneNumber()
-    }
-}
-
 const createDB = async (connection) => {
 
     // Utiliser la base de données
@@ -25,11 +12,13 @@ const createDB = async (connection) => {
     // Filtre les existTables qui ne sont pas dans expectTables
     const missingTables = expectTables.filter(table => !existTables.includes(table));
 
+    let [rows] = []
+
     // Créer les tables manquantes avec des données factives
     missingTables.forEach(async table => {
         switch (table) {
             case 'User': // ------------------------------------------------------------------------------------------------------------------
-                const [rows] = await connection.query(`SHOW TABLES LIKE '${table}'`);
+                [rows] = await connection.query(`SHOW TABLES LIKE '${table}'`);
                 if (rows.length === 0) {
                     await connection.query(`
                         CREATE TABLE ${table} (
@@ -45,39 +34,42 @@ const createDB = async (connection) => {
                     `);
                 }
 
-                const insertIntoSQLUser = `INSERT INTO (firstname, lastname, isAdmin, password, email, adress, phone) VALUES `
-                const insertValuesUser = [];
-                // Création de User
-                for (let i = 0; i < 10; i++) {
-                    insertValuesUser.push(`(${randomUser.fakeFirstName}, ${randomUser.fakeLastName},${randomUser.isAdmin},${randomUser.password}, ${randomUser.fakeEmail}, ${randomUser.fakeAddress}, ${randomUser.fakePhoneNumber})`)
-                }
+                // const insertIntoSQLUser = `INSERT INTO (firstname, lastname, isAdmin, password, email, adress, phone) VALUES `
+                // const insertValuesUser = [];
+                // // Création de User
+                // for (let i = 0; i < 10; i++) {
+                //     // console.dir(randomUser())
+                //     insertValuesUser.push(`(${randomUser().fakeFirstName}, ${randomUser().fakeLastName},${randomUser().isAdmin},${randomUser().password}, ${randomUser().fakeEmail}, ${randomUser().fakeAddress}, ${randomUser().fakePhoneNumber})`)
+                // }
 
-                await connection.query(`${insertIntoSQLUser}${insertValuesUser.join(', ')}`);
+                // await connection.query(`${insertIntoSQLUser}${insertValuesUser.join(', ')}`);
 
                 break;
 
             case 'Command': // ------------------------------------------------------------------------------------------------------
-                SQL = `
-                    CREATE TABLE ${table} (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        dateCreated DATE NOT NULL,
-                        dateShipped DATE,
-                        status ENUM('Shipped','Prepared','In preparing') NOT NULL,
-                        UserId int,
-                        FOREIGN KEY (UserId) REFERENCES User(UserId)
-                    )
-                `
-                await connection.query(SQL);
+                [rows] = await connection.query(`SHOW TABLES LIKE '${table}'`);
+                if (rows.length === 0) {
+                    await connection.query(`
+                        CREATE TABLE ${table} (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            dateCreated DATE NOT NULL,
+                            dateShipped DATE,
+                            status ENUM('Shipped','Prepared','In preparing') NOT NULL,
+                            UserId int,
+                            FOREIGN KEY (UserId) REFERENCES User(id)
+                        )
+                    `);
+                }
 
-                const insertIntoSQLCommand = `INSERT INTO (dateCreated, dateShipped, status) VALUES `
-                const insertValuesCommand = [];
+                const insertIntoSQLCommand = `INSERT INTO Command (dateCreated, dateShipped, status) VALUES `
+                let insertValuesCommand = [];
 
                 // Les commandes envoyées (Shipped)
                 for (let i = 0; i < 50; i++) {
-                    const [dateCreated, dateShipped]= generateDates()
-                    insertValuesCommand.push(`(${dateCreated},${dateShipped},'Shipped')`)
+                    const [dateCreated, dateShipped] = generateDates();
+                    insertValuesCommand.push(`('${dateCreated}', ${dateShipped ? `'${dateShipped}'` : 'NULL'}, 'In preparing')`);
                 }
-                await connection.query(`${insertIntoSQLCommand}${insertValuesUser.join(', ')}`);
+                await connection.query(`${insertIntoSQLCommand}${insertValuesCommand.join(', ')}`);
                 insertValuesCommand = [];
 
                 // Les commandes préparées mais non envoyées (Prepared)
@@ -99,42 +91,46 @@ const createDB = async (connection) => {
                 break;
 
             case 'Product': // --------------------------------------------------------------------------------------------------------------
-                SQL = `
-                    CREATE TABLE ${table} (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        name VARCHAR(255) NOT NULL,
-                        description TEXT,
-                        price FLOAT NOT NULL,
-                        images VARCHAR(255) NOT NULL
-                    )
-                `
-                await connection.query(SQL);
+                
+                [rows] = await connection.query(`SHOW TABLES LIKE '${table}'`);
+                if (rows.length === 0) {
+                    await connection.query(`
+                        CREATE TABLE ${table} (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(255) NOT NULL,
+                            description TEXT,
+                            price FLOAT NOT NULL,
+                            images VARCHAR(255) NOT NULL
+                        )
+                    `);
+                }
 
                 const productsListing = [
-                    {name: 'Crêpe', description: NULL, price: 2, images: ['BACK\images\Crepe\crepe.jpeg','BACK\images\Crepe\telechargement.jpeg']},
-                    {name: 'Gaufre', description: NULL, price: 2.50, images: ['BACK\images\Gauffre\gauffre.jpeg','BACK\images\Gauffre\telechargement.jpeg']},
-                    {name: 'PomPot', description: NULL, price: 3, images: ['BACK\images\PomPot\tour.jpeg','BACK\images\PomPot\PomPot1.jpg','BACK\images\PomPot\pompotes.jpeg']},
-                    {name: 'Pain au chocolat', description: NULL, price: 1.50, images: ['BACK\images\Pain_au_chocolat\pain_au_chocolat.jpeg','BACK\images\Pain_au_chocolat\telechargement.jpeg']},
-                    {name: 'Croissant', description: NULL, price: 1, images: ['BACK\images\Croissant\croissant.jpg','BACK\images\Croissant\telechargement.jpeg']},
-                    {name: 'Yaourt', description: NULL, price: 2, images: ['BACK\images\Yaourt\telechargement.jpeg','BACK\images\Yaourt\yaourt.jpeg']},
-                    {name: 'Pomme', description: NULL, price: 1, images: ['BACK\images\Pomme\pomme.jpeg','BACK\images\Pomme\telechargement.jpeg']},
-                    {name: 'Chips', description: NULL, price: 3, images: ['BACK\images\Chips\chips.jpeg','BACK\images\Chips\telechargement.jpeg']},
-                    {name: 'Pépito', description: NULL, price: 2.50, images: ['BACK\images\Pepito\pepito.jpeg','BACK\images\Pepito\telechargement.jpeg']},
-                    {name: 'Brioche', description: NULL, price: 2, images: ['BACK\images\Brioches\brioche.jpeg','BACK\images\Brioches\telechargement.jpeg']},
-                    {name: 'Brownie', description: NULL, price: 2, images: ['BACK\images\Brownie\brownie.jpeg','BACK\images\Brownie\telechargement.jpeg']},
-                    {name: 'Pancake', description: NULL, price: 1, images: ['BACK\images\Pancakes\pancakes.jpeg','BACK\images\Pancakes\telechargement.jpeg']},
-                    {name: 'Les petits écoliers', description: NULL, price: 2, images: ['BACK\images\Les_petits_ecoliers\images.jpeg','BACK\images\Les_petits_ecoliers\telechargement.jpeg']},
-                    {name: 'Kinder', description: NULL, price: 3, images: ['BACK\images\Kinder\kinder.jpg','BACK\images\Kinder\telechargement.jpeg']},
-                    {name: 'Oreo', description: NULL, price: 3, images: ['BACK\images\Oreo\oreo.jpeg','BACK\images\Oreo\telechargement.jpeg']},
-                    {name: 'Mikado', description: NULL, price: 3, images: ['BACK\images\Mikado\mikado.jpeg','BACK\images\Mikado\'telechargement.jpeg']},
+                    {name: 'Crêpe', description: null, price: 2, images: ['BACK\images\Crepe\crepe.jpeg','BACK\images\Crepe\telechargement.jpeg']},
+                    // {name: 'Gaufre', description: null, price: 2.50, images: ['BACK\images\Gauffre\gauffre.jpeg','BACK\images\Gauffre\telechargement.jpeg']},
+                    // {name: 'PomPot', description: null, price: 3, images: ['BACK\images\PomPot\tour.jpeg','BACK\images\PomPot\PomPot1.jpg','BACK\images\PomPot\pompotes.jpeg']},
+                    // {name: 'Pain au chocolat', description: null, price: 1.50, images: ['BACK\images\Pain_au_chocolat\pain_au_chocolat.jpeg','BACK\images\Pain_au_chocolat\telechargement.jpeg']},
+                    // {name: 'Croissant', description: null, price: 1, images: ['BACK\images\Croissant\croissant.jpg','BACK\images\Croissant\telechargement.jpeg']},
+                    // {name: 'Yaourt', description: null, price: 2, images: ['BACK\images\Yaourt\telechargement.jpeg','BACK\images\Yaourt\yaourt.jpeg']},
+                    // {name: 'Pomme', description: null, price: 1, images: ['BACK\images\Pomme\pomme.jpeg','BACK\images\Pomme\telechargement.jpeg']},
+                    // {name: 'Chips', description: null, price: 3, images: ['BACK\images\Chips\chips.jpeg','BACK\images\Chips\telechargement.jpeg']},
+                    // {name: 'Pépito', description: null, price: 2.50, images: ['BACK\images\Pepito\pepito.jpeg','BACK\images\Pepito\telechargement.jpeg']},
+                    // {name: 'Brioche', description: null, price: 2, images: ['BACK\images\Brioches\brioche.jpeg','BACK\images\Brioches\telechargement.jpeg']},
+                    // {name: 'Brownie', description: null, price: 2, images: ['BACK\images\Brownie\brownie.jpeg','BACK\images\Brownie\telechargement.jpeg']},
+                    // {name: 'Pancake', description: null, price: 1, images: ['BACK\images\Pancakes\pancakes.jpeg','BACK\images\Pancakes\telechargement.jpeg']},
+                    // {name: 'Les petits écoliers', description: null, price: 2, images: ['BACK\images\Les_petits_ecoliers\images.jpeg','BACK\images\Les_petits_ecoliers\telechargement.jpeg']},
+                    // {name: 'Kinder', description: null, price: 3, images: ['BACK\images\Kinder\kinder.jpg','BACK\images\Kinder\telechargement.jpeg']},
+                    // {name: 'Oreo', description: null, price: 3, images: ['BACK\images\Oreo\oreo.jpeg','BACK\images\Oreo\telechargement.jpeg']},
+                    // {name: 'Mikado', description: null, price: 3, images: ['BACK\images\Mikado\mikado.jpeg','BACK\images\Mikado\'telechargement.jpeg']},
                 ];
 
-                const insertIntoSQProduct = `INSERT INTO (name, description, price, images) VALUES`
+                const insertIntoSQProduct = `INSERT INTO Product (name, description, price, images) VALUES`
                 const insertValuesProduct = [];
 
                 // Ajouter les tableaux des produits en DB
                 for (let i = 0; i < productsListing.length; i++) {
-                    insertValuesProduct.push(`(${productsListing[i].name},NULL,${productsListing[i].price},${productsListing[i].images})`)
+                   const images = productsListing[i].images.join(",");
+                    insertValuesProduct.push(`('${productsListing[i].name}', NULL, ${productsListing[i].price}, '${images}')`);
                 }
 
                 await connection.query(`${insertIntoSQProduct}${insertValuesProduct.join(', ')}`);
@@ -157,8 +153,8 @@ const createDB = async (connection) => {
                 // Tableau pour stocker les paires commande-produit
                 const orderList = [];
 
-                const commands = await connection.query(`SELECT * FROM commands`)
-                const products = await connection.query(`SELECT * FROM products`)
+                const commands = await connection.query(`SELECT * FROM command`)
+                const products = await connection.query(`SELECT * FROM product`)
                 
                 // Associer aléatoirement à une commande un produit
                 for (let i = 0; i < 10; i++) {
@@ -174,7 +170,7 @@ const createDB = async (connection) => {
                     const randomProduct = products[Math.floor(Math.random() * products.length)];
 
                     // Supprimer le produit choisi du tableau pour éviter qu'il ne soit réutilisé
-                    products.splice(randomProductIndex, 1);
+                    products.splice(randomProduct, 1);
 
                     // Ajouter la paire commande-produit à la liste
                     orderList.push({ command: command, product: randomProduct });
@@ -194,72 +190,75 @@ const createDB = async (connection) => {
             
     });
 
-    function generatePassword() {
-        let password = '';
+    // function generatePassword() {
+    //     let password = '';
 
-        // Définir les caractères spéciaux et les chiffres possibles
-        const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-        const numbers = '0123456789';
+    //     // Définir les caractères spéciaux et les chiffres possibles
+    //     const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    //     const numbers = '0123456789';
 
-        // Générer un mot de passe jusqu'à ce qu'il remplisse toutes les contraintes
-        while (
-                password.length < 8 
-            || 
-                password.length > 25 
-            || 
-                !/[!@#$%^&*()_+\-=\[\]{}|;:',.<>?]/.test(password) 
-            || 
-                !/\d/.test(password)
-            ) 
-        {
-            // Générer un mot de passe aléatoire avec Faker
-            password = faker.internet.password();
+    //     // Générer un mot de passe jusqu'à ce qu'il remplisse toutes les contraintes
+    //     while (
+    //             password.length < 8 
+    //         || 
+    //             password.length > 25 
+    //         || 
+    //             !/[!@#$%^&*()_+\-=\[\]{}|;:',.<>?]/.test(password) 
+    //         || 
+    //             !/\d/.test(password)
+    //         ) 
+    //     {
+    //         // Générer un mot de passe aléatoire avec Faker
+    //         password = faker.internet.password();
 
-            // Vérifier la longueur et ajouter des caractères spéciaux et des chiffres si nécessaire
-            if (password.length < 8 || password.length > 25) 
-                continue;
+    //         // Vérifier la longueur et ajouter des caractères spéciaux et des chiffres si nécessaire
+    //         if (password.length < 8 || password.length > 25) 
+    //             continue;
 
-            if (!/[!@#$%^&*()_+\-=\[\]{}|;:',.<>?]/.test(password)) {
-                const randomSpecialChar = specialChars[Math.floor(Math.random() * specialChars.length)];
-                password += randomSpecialChar;
-            }
-            if (!/\d/.test(password)) {
-                const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
-                password += randomNumber;
-            }
-        }
+    //         if (!/[!@#$%^&*()_+\-=\[\]{}|;:',.<>?]/.test(password)) {
+    //             const randomSpecialChar = specialChars[Math.floor(Math.random() * specialChars.length)];
+    //             password += randomSpecialChar;
+    //         }
+    //         if (!/\d/.test(password)) {
+    //             const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
+    //             password += randomNumber;
+    //         }
+    //     }
 
-        return password;
+    //     return password;
+    // }
+
+    // const randomUser = () => {
+    //     return {
+    //         fakeFirstname: faker.fr.person.first_name[Math.floor(Math.random() * 1000)],
+    //         fakeLastname: faker.fr.person.last_name[Math.floor(Math.random() * 1000)],
+    //         isAdmin: 0,
+    //         password: generatePassword(),
+    //         fakeEmail: faker.internet.email(),
+    //         fakeAdress: faker.address.streetAddress(),
+    //         fakePhone: faker.phone.phoneNumber()
+    //     }
+    // }
+
+    function generateDates() {
+    // Fonction pour générer une date aléatoire entre startDate et endDate
+    function randomDate(startDate, endDate) {
+        return new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
     }
 
-    function generateDates () {
-        // Fonction pour générer une date aléatoire entre startDate et endDate
-        function randomDate(startDate, endDate) {
-            return new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
-        }
+    // Générer une date entre aujourd'hui et N-1
+    const nDaysAgo = new Date();
+    nDaysAgo.setDate(nDaysAgo.getDate() - 0); // Remplacer 0 par le nombre de jours souhaité
 
-        // Fonction pour formater une date au format YYYY-MM-DD
-        function formatDate(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
+    const randomDate1 = randomDate(nDaysAgo, new Date());
+    const formattedDate1 = randomDate1.toISOString().split('T')[0];
 
-        // Générer une date entre aujourd'hui et N-1
-        const today = new Date();
-        const nDaysAgo = new Date(today);
-        nDaysAgo.setDate(today.getDate() - N); // Remplacer N par le nombre de jours souhaité
+    // Générer une deuxième date entre la date précédemment générée et aujourd'hui
+    const randomDate2 = randomDate(randomDate1, new Date());
+    const formattedDate2 = randomDate2.toISOString().split('T')[0];
 
-        const randomDate1 = randomDate(nDaysAgo, today);
-        const formattedDate1 = formatDate(randomDate1);
-
-        // Générer une deuxième date entre la date précédemment générée et aujourd'hui
-        const randomDate2 = randomDate(randomDate1, today);
-        const formattedDate2 = formatDate(randomDate2);
-
-        return [formattedDate1, randomDate2]
-    }
+    return [formattedDate1, formattedDate2];
+}
     
     console.log('DB Crée')
 };
