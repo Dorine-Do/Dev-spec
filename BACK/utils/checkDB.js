@@ -3,16 +3,15 @@ const createDB = require('./createBD')
 
 const checkDB = async (connection) => {
     const [databases] = await connection.query('SHOW DATABASES');
-    if (!databases.some(database => database.Database === 'tp')) {
-        await connection.query('CREATE DATABASE tp');
-        console.log('Database created');
+    if (!databases.some(database => database.Database === 'SnackKing')) {
+        try {
+            await createDB(connection)
+            return true
+        } catch(err) {
+            console.error(err)
+            return false
+        }
     }
-
-    // Utiliser la base de données
-    await connection.query('USE tp');
-
-    // Vérifier si les table existe
-    await createDB(connection)
 
 }
 
