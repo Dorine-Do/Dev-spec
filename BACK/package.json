@@ -5,5 +5,8 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "mysql2": "^3.9.7"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1"
   }
 }
