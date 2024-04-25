@@ -3,8 +3,11 @@ const app = express();
 const connectDB = require('./utils/connectDB')
 
 const registerRoute = require('./routes/register/route')
+const loginRoute = require('./routes/login/route')
 
 app.use('/register', registerRoute)
+
+app.use('/login', loginRoute)
 
 app.get('/', async (req, res) => {
     res.send('API BACK')
