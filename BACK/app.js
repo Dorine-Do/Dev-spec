@@ -2,11 +2,15 @@ const express = require('express');
 const app = express();
 const connectDB = require('./utils/connectDB')
 
+const registerRoute = require('./routes/register/route')
+
+app.use('/register', registerRoute)
+
 app.get('/', async (req, res) => {
     res.send('API BACK')
     try {
         await connectDB()
-        console.log('Connected to the database')
+        console.log('Connected')
     } catch (error) {
         console.log('Failed to connect to the database: ' + error)
     }
