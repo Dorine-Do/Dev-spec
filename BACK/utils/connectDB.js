@@ -10,18 +10,20 @@ const connectDB = async () => {
         host: 'localhost',
         user: 'root',
         password: 'root',
+        multipleStatements: true
     })
 
     try {
         connection.connect()
-        try {
-            await connection.query('CREATE DATABASE IF NOT EXISTS SnackKing')
-            checkDB(connection)
-        } catch (err) {
-            console.error('Error creating database after connexion: ' + err)
+        if(checkDB(connection)) {
+            console.log('Connected and created the database')
+            return true
+        } else {
+            console.log('Connected to the database')
         }
     } catch(err) {
         console.error('Error connecting to the database: ' + err)
+        return false
     }
 
     // createDB(connection)
