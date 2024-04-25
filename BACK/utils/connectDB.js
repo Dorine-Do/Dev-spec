@@ -1,32 +1,31 @@
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
-const checkDB = require('./checkDB')
+const checkDB = require('./checkDB');
 
 dotenv.config()
 
 const connectDB = async () => {
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: 'root',
-        database: 'tp'
-    })
+    try {
+        const connection = await mysql.createConnection({
+            host: 'localhost',
+            user: 'root',
+            password: 'root',
+            multipleStatements: true
+        });
 
-    connection.connect(async (err) => {
-        if(err) {
-            console.error('Error connecting to the database: ' + err)
-            reject(err)
+        const dbExists = await checkDB(connection);
+
+        if(dbExists) {
+            console.log('Connected and created the database');
         } else {
-            console.log('Connected to the database')
-            try {
-                await checkDB(connection)
-                resolve()
-            } catch(err) {
-                console.error('Failed to connect to the database: ' + err)
-                reject(err)
-            }
+            console.log('Connected to the database');
         }
-    })
+
+        return connection;
+    } catch(err) {
+        console.error('Error connecting to the database: ' + err);
+        return null;
+    }
 }
 
 module.exports = connectDB
