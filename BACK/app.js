@@ -3,7 +3,7 @@ const app = express();
 const connectDB = require('./utils/connectDB')
 
 // MIDDLEWAR pour bloquer les autres ip, a mettre a la fin -->
-
+// TODO : Ajouter condition si page stastique
 // app.use((req, res, next) => {
 //     const clientIp = req.connection.remoteAddress.includes('::') ? `[${req.connection.remoteAddress}]` : req.connection.remoteAddress;
 //     if (clientIp === 'localhost' || clientIp === '127.0.0.1' || clientIp === '::1') {
