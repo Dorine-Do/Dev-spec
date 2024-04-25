@@ -1,51 +1,63 @@
-const { faker } = require('@faker-js/faker');
+const faker = require('@faker-js/faker')
+
+
+const randomUser = () => {
+    return {
+        fakeFirstname: faker.name.firstName(),
+        fakeLastname: faker.name.lastName(),
+        isAdmin: 0,
+        password: generatePassword(),
+        fakeEmail: faker.internet.email(),
+        fakeAdress: faker.address.streetAddress(),
+        fakePhone: faker.phone.phoneNumber()
+    }
+}
 
 const createDB = async (connection) => {
 
-    // Récupère toutes les tables de la db attendues
+    // Utiliser la base de données
+    connection.query('USE SnackKing');
+
+    // Récupère toutes les tables de la db 
+    const [existTables] = await connection.query('SHOW TABLES');
     const expectTables = ['User', 'Command', 'Details_command', 'Product']
+
+    // Filtre les existTables qui ne sont pas dans expectTables
+    const missingTables = expectTables.filter(table => !existTables.includes(table));
 
     // Créer les tables manquantes avec des données factives
     expectTables.forEach(async table => {
         switch (table) {
             case 'User': // ------------------------------------------------------------------------------------------------------------------
-            let UserSQL = `
-                CREATE TABLE ${table} (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    firstname VARCHAR(255) NOT NULL,
-                    lastname VARCHAR(255) NOT NULL,
-                    isAdmin BOOL NOT NULL,
-                    password VARCHAR(255) NOT NULL,
-                    email VARCHAR(255) NOT NULL,
-                    adress VARCHAR(255) NOT NULL,
-                    phone VARCHAR(255) NOT NULL
-                )
-            `
-            await connection.query(UserSQL);
+                const [rows] = await connection.query(`SHOW TABLES LIKE '${table}'`);
+                if (rows.length === 0) {
+                    await connection.query(`
+                        CREATE TABLE ${table} (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            firstname VARCHAR(255) NOT NULL,
+                            lastname VARCHAR(255) NOT NULL,
+                            isAdmin BOOL NOT NULL,
+                            password VARCHAR(255) NOT NULL,
+                            email VARCHAR(255) NOT NULL,
+                            adress VARCHAR(255) NOT NULL,
+                            phone VARCHAR(255) NOT NULL
+                        );
+                    `);
+                }
 
-            const insertIntoSQLUser = `INSERT INTO User (firstname, lastname, isAdmin, password, email, adress, phone) VALUES `
-            const insertValuesUser = [];
+                const insertIntoSQLUser = `INSERT INTO (firstname, lastname, isAdmin, password, email, adress, phone) VALUES `
+                const insertValuesUser = [];
+                // Création de User
+                for (let i = 0; i < 10; i++) {
+                    insertValuesUser.push(`(${randomUser.fakeFirstName}, ${randomUser.fakeLastName},${randomUser.isAdmin},${randomUser.password}, ${randomUser.fakeEmail}, ${randomUser.fakeAddress}, ${randomUser.fakePhoneNumber})`)
+                }
 
-            // Création de User
-            for (let i = 0; i < 10; i++) {
-                const fakeFirstName = faker.person.firstName(); // Prénom fictif
-                const fakeLastName = faker.person.lastName(); // Nom de famille fictif
-                const fakeEmail = faker.internet.email(); // Email fictif
-                const fakeAddress = faker.location.streetAddress(); // Adresse fictive
-                const fakePhoneNumber = faker.phone.number(); // Numéro de téléphone fictif
-                const password = generatePassword() // Mot de passe respectant la norme de sécurité
-                const isAdmin = 0 // Pas admin
-                
-                insertValuesUser.push(`("${fakeFirstName}", "${fakeLastName}",${isAdmin},"${password}"," ${fakeEmail}", "${fakeAddress}", "${fakePhoneNumber}")`)
+                await connection.query(`${insertIntoSQLUser}${insertValuesUser.join(', ')}`);
 
-            }
-
-            await connection.query(`${insertIntoSQLUser}${insertValuesUser.join(', ')}`);
-
-            break;
+                break;
 
             case 'Command': // ------------------------------------------------------------------------------------------------------
-                let CommandSQL = `
+                SQL = `
                     CREATE TABLE ${table} (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         dateCreated DATE NOT NULL,
@@ -96,7 +108,7 @@ const createDB = async (connection) => {
                 break;
 
             case 'Product': // --------------------------------------------------------------------------------------------------------------
-                let ProductSQL = `
+                SQL = `
                     CREATE TABLE ${table} (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
@@ -138,7 +150,8 @@ const createDB = async (connection) => {
                 break;
 
             case 'Details_command': // ------------------------------------------------------------------------------------------------------
-                let Details_commandSQL = `
+
+                SQL = `
                     CREATE TABLE ${table} (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         quantity INT NOT NULL,      

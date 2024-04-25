@@ -7,6 +7,18 @@ app.listen(3000, 'localhost', () => {
     console.log('Server is running on port 3000');
 });
 
+// CSP css / js / form
+// Le navigateur va check si les forms proviennent bien de nous
+// Toutes les balises style/script inline, script doivent avoir en attribut 'nonce' avec en value la string générée avec Math.random
+// Si vous voulez faire du style inline sur une page, dans son 'render' en back il faudra rajouter : cspNonce = req.nonce
+// Cela va transmettre au front la string générée et dans la balise style/script, il faudra rajouter en attribut : nonce = cspNonce 
+app.use((req, res, next,) => {
+    // subString 2 car sinon pas assez complexe
+    const nonce = (Math.random()+1).toString(36).subString(2);
+    req.nonce = nonce;
+    res.appendHeader(`"Content-Security-Policy", style-src 'nonce-${nonce}'; scrpit-src 'nonce-${nonce}'; form-action 'self'`)
+    next()
+})
 
 // // Configuration de la base de données
 // const connection = mysql.createConnection({
