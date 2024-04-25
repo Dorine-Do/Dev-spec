@@ -13,12 +13,12 @@ const connectDB = require('./utils/connectDB')
 //     }
 // });
 
-const registerRoute = require('./routes/register/route')
-const loginRoute = require('./routes/login/route')
 
-app.use('/register', registerRoute)
+app.use('/register', require('./routes/register/route'))
 
-app.use('/login', loginRoute)
+app.use('/login', require('./routes/login/route'))
+
+app.use('/products', require('./routes/products/route'))
 
 app.get('/', async (req, res) => {
     res.send('API BACK')
