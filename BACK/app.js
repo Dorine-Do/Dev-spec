@@ -20,6 +20,8 @@ app.use('/login', require('./routes/login/route'))
 
 app.use('/products', require('./routes/products/route'))
 
+app.use('/commands', require('./routes/commands/route'))
+
 app.get('/', async (req, res) => {
     res.send('API BACK')
     try {
