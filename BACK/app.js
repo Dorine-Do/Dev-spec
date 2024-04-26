@@ -22,7 +22,7 @@ app.use('/products', require('./routes/products/route'))
 
 app.use('/commands', require('./routes/commands/route'))
 
-app.use('/details_commands', require('./routes/details_commands/route'))
+// app.use('/details_commands', require('./routes/details_commands/route'))
 
 app.get('/', async (req, res) => {
     res.send('API BACK')

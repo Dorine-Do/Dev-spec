@@ -3,10 +3,25 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
+app.set('view engine', 'ejs');
+
 app.listen(3000, 'localhost', () => {
     console.log('Server is running on port 3000');
 });
 
+// CSP css / js / form
+// Le navigateur va check si les forms proviennent bien de nous
+// Toutes les balises style/script inline, script doivent avoir en attribut 'nonce' avec en value la string générée avec Math.random
+// Si vous voulez faire du style inline sur une page, dans son 'render' en back il faudra rajouter : cspNonce = req.nonce
+// Cela va transmettre au front la string générée et dans la balise style/script, il faudra rajouter en attribut : nonce = cspNonce 
+app.use((req, res, next,) => {
+    // subString 2 car sinon pas assez complexe
+    const nonce = (Math.random() + 1).toString(36).substring(2);
+    req.nonce = nonce;
+    // Checked avec https://csp-evaluator.withgoogle.com/
+    res.appendHeader('Content-Security-Policy', `form-action 'self'; style-src 'nonce-${nonce}' https://cdn.jsdelivr.net; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net 'strict-dynamic' 'unsafe-inline'; object-src 'none'; base-uri 'self'; `)
+    next();
+})
 
 // // Configuration de la base de données
 // const connection = mysql.createConnection({
@@ -21,6 +36,17 @@ app.listen(3000, 'localhost', () => {
 //     if (err) throw err;
 //     console.log('Connexion réussi');
 // });
+app.get('/', (req, res) => {
+   
+    res.render('index', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+
+});
+
+app.get('/test', (req, res) => {
+   
+        res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+
+});
 
 //INSCRIPTION//
 //----------------------------------------------------------//
@@ -48,6 +74,9 @@ app.post('/inscription', (req, res) => {
 //----------------------------------------------------------//
 
 app.post('/connexion', (req, res) => {
+
+
+    
     const { email, password } = req.body;
     // Verif si user exist ou pas
     connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], (err, result) => {
@@ -80,14 +109,14 @@ app.get('/deconnexion', (req, res) => {
 //FILTRE PRODUIT//
 //----------------------------------------------------------//
 
-app.get('/filtrer', (req, res) => {
-    const categorie = req.query.categorie;
-    let sql = 'SELECT * FROM produits';
-    if (categorie) {
-        sql += ` WHERE categorie = '${categorie}'`;
-    }
-    connection.query(sql, (err, result) => {
-        if (err) throw err;
-        res.render('accueil', { products: result, csrfToken: req.query.csrfToken }); // Affichage page d'accueil avec filtre produit
-    });
-});
+// app.get('/filtrer', (req, res) => {
+//     const categorie = req.query.categorie;
+//     let sql = 'SELECT * FROM produits';
+//     if (categorie) {
+//         sql += ` WHERE categorie = '${categorie}'`;
+//     }
+//     connection.query(sql, (err, result) => {
+//         if (err) throw err;
+//         res.render('accueil', { products: result, csrfToken: req.query.csrfToken }); // Affichage page d'accueil avec filtre produit
+//     });
+// });

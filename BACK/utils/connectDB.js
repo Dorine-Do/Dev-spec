@@ -1,9 +1,9 @@
+// const mysql = require('mysql');
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 const checkDB = require('./checkDB');
 
 dotenv.config()
-
 const connectDB = async () => {
     try {
         const connection = await mysql.createConnection({
