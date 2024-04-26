@@ -22,7 +22,7 @@ app.use('/products', require('./routes/products/route'))
 
 app.use('/commands', require('./routes/commands/route'))
 
-app.use('/details_commands', require('./routes/details_commands/route'))
+// app.use('/details_commands', require('./routes/details_commands/route'))
 
 app.get('/', async (req, res) => {
     res.send('API BACK')
@@ -33,17 +33,6 @@ app.get('/', async (req, res) => {
         console.log('Failed to connect to the database: ' + error)
     }
 })
-
-//Token CSRF
-const csrf = require('csurf');
-
-const csrfProtection = csrf({});
-
-app.post('/deconnexion', csrfProtection, (req, res) => {
-    res.clearCookie('CSRF-TOKEN');
-    res.status(300).location('/connexion').send('Déconnexion réussie');
-});
-
 
 app.listen(5000, 'localhost', () => {
     console.log('Server is running on port 5000');
