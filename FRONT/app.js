@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 
 const fetch = require('node-fetch')
 
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+
 app.set('view engine', 'ejs');
 
 app.listen(3000, 'localhost', () => {
@@ -52,10 +55,54 @@ app.get('/', async (req, res) => {
 
         return products;
     }
+
+    const fetchAllCategories = async () => {
+        const response = await fetch('http://localhost:5000/product-category', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const categories = await response.json();
+
+        const uniqueCategories = categories.filter((category, index, self) =>
+            index === self.findIndex((c) => (
+                c.id === category.id
+            ))
+        );
+
+        return uniqueCategories;
+    }
    
-    res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchAllProducts()}); // Affichage page d'accueil avec filtre produit
+    res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchAllProducts(), allCategories: await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
 
 });
+
+app.post('/filtre', async (req, res) => {
+
+    res.redirect('/');
+
+    console.log(req.body)
+
+    const category = req.body.category;
+
+    const fetchFilteredProducts = async () => {
+        const response = await fetch('http://localhost:5000/product-filtre', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ category })
+        });
+        const filteredProducts = await response.json();
+
+        return filteredProducts;
+    }
+
+    res.render('accueil', {cspNonce: req.nonce, filteredProducts: await fetchFilteredProducts()}); // Affichage page d'accueil avec filtre produit
+})
 
 app.get('/test', (req, res) => {
    

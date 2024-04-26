@@ -22,6 +22,10 @@ app.use('/products', require('./routes/products/route'))
 
 app.use('/commands', require('./routes/commands/route'))
 
+app.use('/product-category', require('./routes/product-category/route'))
+
+app.use('/product-filtre', require('./routes/product-filtre/route'))
+
 // app.use('/details_commands', require('./routes/details_commands/route'))
 
 app.get('/', async (req, res) => {

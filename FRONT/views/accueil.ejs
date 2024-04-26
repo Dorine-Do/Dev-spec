@@ -20,12 +20,13 @@
     <h3>Nos produits</h3>
     <!-- Formulaire de filtre -->
     <div class="container">
-        <form action="/filtrer" method="post"> 
+        <form action="/filtre" method="post"> 
             <label for="categorie">Filtrer par catégorie:</label>
-            <select name="categorie" id="categorie">
+            <select name="category" id="categorie">
                 <option value="">Toutes</option>
-                <option value="fruit">Fruits</option>
-                <option value="legume">Légumes</option>
+                <% for (let category of allCategories) { %>
+                    <option value="<%= category.category %>" name="<%= category.category %>"><%= category.category %></option>
+                <% } %>
             </select>
             <input type="submit" value="Filtrer">
         </form>
