@@ -7,13 +7,7 @@
 </head>
 <body>
     <h1>Accueil</h1>
-
-    <!-- Vérification du token CSRF -->
-    <script> if (csrfToken === req.query.csrfToken) { </script>
-        <p>Token CSRF valide.</p>
-    <script> } else { </script>
-        <p>Token CSRF invalide.</p>
-    <script> } </script>
+    <button id="deconnexion"> Se déconnecter</button>
 
     <h3>Nos produits</h3>
     <!-- Formulaire de filtre -->
@@ -36,5 +30,25 @@
             </div>
         <script>})</script>
     </div>
+
+    <script>
+        document.getElementById('deconnexion').addEventListener('click', function(){
+            fetch('localhost::5000/deconnexion', {
+                methos: 'POST',
+                credentials: 'include'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = response.headers.get('location');
+                } else {
+
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la déconnexion', error);
+            });
+        });
+    </script>
+
 </body>
 </html>
