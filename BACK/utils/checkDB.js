@@ -1,5 +1,6 @@
 
 const checkDB = async (connection) => {
+
     const [databases] = await connection.query('SHOW DATABASES');
     if (!databases.some(database => database.Database === 'SnackKing')) {
         try {
