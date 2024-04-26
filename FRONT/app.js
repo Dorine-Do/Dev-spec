@@ -3,6 +3,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
+const fetch = require('node-fetch')
+
 app.set('view engine', 'ejs');
 
 app.listen(3000, 'localhost', () => {
@@ -36,15 +38,28 @@ app.use((req, res, next,) => {
 //     if (err) throw err;
 //     console.log('Connexion réussi');
 // });
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+
+    const fetchAllProducts = async () => {
+        const response = await fetch('http://localhost:5000/products', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const products = await response.json();
+
+        return products;
+    }
    
-    res.render('index', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+    res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchAllProducts()}); // Affichage page d'accueil avec filtre produit
 
 });
 
 app.get('/test', (req, res) => {
    
-        res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+    res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
 
 });
 

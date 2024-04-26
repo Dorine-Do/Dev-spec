@@ -43,19 +43,13 @@ app.get('/:id', async (req, res) => {
 })
 
 app.post('/', async (req, res) => {
-    const productData = {
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price,
-        images: req.body.images
-    }
 
     try {
         const connection = await connectDB()
         await connection.query(`
-            INSERT INTO Products (name, description, price, images)
-            VALUES (?, ?, ?, ?)
-        `, [productData.name, productData.description, productData.price, productData.images])
+            INSERT INTO Products (libelle, description, price, images, category)
+            VALUES (?, ?, ?, ?, ?)
+        `, [req.body.name, req.body.description, req.body.price, req.body.images, req.body.category])
         res.status(201).send('Product inserted in the database')
     } catch (error) {
         console.error('Failed to insert product in the database: ' + error)
