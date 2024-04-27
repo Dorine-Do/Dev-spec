@@ -171,6 +171,37 @@ app.post('/search', async (req, res) => {
         res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchSearchedProducts(), allCategories : await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
 });
 
+app.post('/modifProduit', async (req, res) => {
+    res.render('modifProduit', {cspNonce: req.nonce, id: req.body.id, libelle: req.body.libelle, price: req.body.price, category: req.body.category, description: req.body.description, images: req.body.images}); // Affichage page d'accueil avec filtre produit
+})
+
+app.post('/modifProduitID', async (req, res) => {
+
+    const putProduct = async () => {
+        const response = await fetch(`http://localhost:5000/products/${req.body.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ id: req.body.id, libelle: req.body.libelle, price: req.body.price, category: req.body.category, description: req.body.description, images: req.body.images})
+        });
+
+        if (response.ok) {
+            console.log(await response.text());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    if(await putProduct()) {
+        res.redirect('/');
+    } else {
+        res.send('Erreur lors de la modification du produit');
+    }
+})
+
 app.get('/test', (req, res) => {
    
     res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit

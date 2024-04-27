@@ -58,21 +58,15 @@ app.post('/', async (req, res) => {
 })
 
 app.put('/:id', async (req, res) => {
-    const productData = {
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price,
-        images: req.body.images
-    }
 
     try {
         const connection = await connectDB()
         await connection.query(`
             UPDATE Products
-            SET name = ?, description = ?, price = ?, images = ?
+            SET libelle = ?, description = ?, price = ?, images = ?, category = ?
             WHERE id = ?
-        `, [productData.name, productData.description, productData.price, productData.images, req.params.id])
-        res.status(200).send('Product updated in the database')
+        `, [req.body.libelle, req.body.description, req.body.price, req.body.images, req.body.category ,req.body.id])
+        res.status(200).json({ message: 'Product updated in the database' });
     } catch (error) {
         console.error('Failed to update product in the database: ' + error)
         res.status(500).send('Failed to update product in the database')
