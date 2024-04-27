@@ -93,6 +93,10 @@ app.use('/modifProduitID', require('./routes/modifProduitID/route'))
 
 app.use('/deleteProduit', require('./routes/delete/route'))
 
+app.use('/addProduct', require('./routes/addProduct/route'))
+
+app.use('/addProductDB', require('./routes/addProductDB/route'))
+
 app.get('/test', (req, res) => {
    
     res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit

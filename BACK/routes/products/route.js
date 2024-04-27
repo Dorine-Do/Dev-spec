@@ -49,8 +49,8 @@ app.post('/', async (req, res) => {
         await connection.query(`
             INSERT INTO Products (libelle, description, price, images, category)
             VALUES (?, ?, ?, ?, ?)
-        `, [req.body.name, req.body.description, req.body.price, req.body.images, req.body.category])
-        res.status(201).send('Product inserted in the database')
+        `, [req.body.libelle, req.body.description, req.body.price, req.body.images, req.body.category])
+        res.status(200).json({ message: 'Product updated in the database' });
     } catch (error) {
         console.error('Failed to insert product in the database: ' + error)
         res.status(500).send('Failed to insert product in the database')

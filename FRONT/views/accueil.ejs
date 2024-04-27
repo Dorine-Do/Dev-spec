@@ -35,6 +35,9 @@
             </select>
             <input type="submit" value="Filtrer">
         </form>
+        <form action="/addProduct" method="post">
+            <input type="submit" class="btn btn-success" value="Ajouter un produit">
+        </form>
         <div id="allProducts" class="row">
             <% for (let product of allProducts) { %>
                 <div class="col-md-4">
