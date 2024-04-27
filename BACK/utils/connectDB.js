@@ -5,27 +5,25 @@ const checkDB = require('./checkDB');
 
 dotenv.config()
 const connectDB = async () => {
-    try {
-        const connection = await mysql.createConnection({
-            host: 'localhost',
-            user: process.env.DB_USER,
-            password: process.env.DB_PSWD,
-            multipleStatements: true
-        });
 
-        const dbExists = await checkDB(connection);
+    const connection = await mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: 'root',
+        database: 'SnackKing',
+        multipleStatements: true
+    });
 
-        if(dbExists) {
-            console.log('Connected and created the database');
-        } else {
-            console.log('Connected to the database');
-        }
+    const dbExists = await checkDB(connection);
 
-        return connection;
-    } catch(err) {
-        console.error('Error connecting to the database: ' + err);
-        return null;
+    if(dbExists) {
+        console.log('Connected and created the database');
+    } else {
+        console.log('Connected to the database');
     }
+
+    return connection;
+
 }
 
 module.exports = connectDB
