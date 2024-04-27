@@ -3,6 +3,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
+const csrf = require('csurf');
+const jwt = require ('jsonwebtoken');
 
 app.set('view engine', 'ejs');
 
@@ -73,26 +75,25 @@ app.post('/inscription', (req, res) => {
 
 //CONNEXION//
 //----------------------------------------------------------//
-
 app.post('/connexion', (req, res) => {
-
-
-    
     const { email, password } = req.body;
-    // Verif si user exist ou pas
+    // Vérification si l'utilisateur existe ou non
     connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], (err, result) => {
         if (err) throw err;
         if (result.length > 0) {
-            // Génération token random
-            const csrfToken = Math.random().toString(36).substring(2);
-            // Redirection  automatique si token valid
-            res.redirect(`/accueil?csrfToken=${csrfToken}`);
+            const user = result[0];
+            // Génération du token JWT
+            const token = generateToken({ email: user.email });
+            // Token JWT dans un cookie de session
+            res.cookie('jwt', token, { httpOnly: true });
+            // Redirection vers la page d'accueil
+            res.redirect('/accueil');
         } else {
-            // Utilisateur non trouvé, afficher un message d'erreur
             res.send("Email ou mot de passe incorrect");
         }
     });
 });
+
 
 //COOKIE CSRF//
 //----------------------------------------------------------//
@@ -104,18 +105,37 @@ app.use(cookieParser());
 app.get('/inscription', csrfProtection, function (req, res) {
     res.render('inscription', {csrfToken: req.csrfToken() });
 });
+
 app.get('/connexion', csrfProtection, function (req, res) {
     res.render('connexion', {csrfToken: req.csrfToken() });
 });
 
-app.post('/accueil', parseForm, csrfProtection, function (req, res) {
-    res.send('Validité validé avec validation');
+app.post('/inscription', csrfProtection, parseForm, function (req, res) {
+    if(req.csrfToken()) {
+        res.send('Formulaire soumis avec succès');
+    } else {
+        res.status(403).send('Jeton invalide');
+    }
 });
+
+app.post('/connexion', csrfProtection, parseForm, function (req, res) {
+    if(req.csrfToken()) {
+        res.send('Formulaire soumis avec succès');
+    } else {
+        res.status(403).send('Jeton invalide');
+    }
+});
+
 
 //DECONNEXION//
 //----------------------------------------------------------//
+app.get('/deconnexion', (req, res) => {
+    // Supprimer le cookie et le token JWT
+    res.clearCookie('jwt');
+    // Redirection vers page d'accueil
+    res.redirect('/accueil');
+});
 
-//en cours
 
 
 //FILTRE PRODUIT//

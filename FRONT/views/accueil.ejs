@@ -1,15 +1,8 @@
 <h1>Accueil</h1>
 
-<!-- Vérification du token CSRF -->
-<% if (csrfToken === req.query.csrfToken) { %>
-    <p>Token CSRF valide.</p>
-    <% } else { %>
-    <p>Token CSRF invalide.</p>
-<% } %>
-
 <h3>Nos produits</h3>
 <!-- Formulaire de filtre -->
-<form action="/filtrer" method="get"> 
+<form action="/accueil" method="get"> 
     <label for="categorie">Filtrer par catégorie:</label>
     <select name="categorie" id="categorie">
         <option value="">Toutes</option>
@@ -18,13 +11,13 @@
     </select>
     <input type="submit" value="Filtrer">
 </form>
-<div id="products">
-    <% products.forEach(product => { %>
+<!-- <div id="products">
+    <script> products.forEach(product => { </script>
         <div>
             <h4><script>product.nom</script></h4>
             <p><script>product.description</script></p>
             <p>Prix: <script>product.prix</script></p>
             <p>Catégorie: <script>product.categorie</script></p>
         </div>
-        <% }); %>
-</div>
+        <script> }); </script>
+</div> -->
