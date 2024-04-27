@@ -28,19 +28,6 @@ app.use((req, res, next,) => {
     next();
 })
 
-// // Configuration de la base de données
-// const connection = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'root',
-//     password: 'password',
-//     database: 'database'
-// });
-
-// // Connexion à la base de données
-// connection.connect((err) => {
-//     if (err) throw err;
-//     console.log('Connexion réussi');
-// });
 app.get('/', async (req, res) => {
 
     const fetchAllProducts = async () => {
@@ -97,11 +84,6 @@ app.use('/addProduct', require('./routes/addProduct/route'))
 
 app.use('/addProductDB', require('./routes/addProductDB/route'))
 
-app.get('/test', (req, res) => {
-   
-    res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
-
-});
 
 //INSCRIPTION//
 //----------------------------------------------------------//
@@ -159,19 +141,3 @@ app.get('/deconnexion', (req, res) => {
     res.redirect('/accueil');
 });
 
-
-
-//FILTRE PRODUIT//
-//----------------------------------------------------------//
-
-// app.get('/filtrer', (req, res) => {
-//     const categorie = req.query.categorie;
-//     let sql = 'SELECT * FROM produits';
-//     if (categorie) {
-//         sql += ` WHERE categorie = '${categorie}'`;
-//     }
-//     connection.query(sql, (err, result) => {
-//         if (err) throw err;
-//         res.render('accueil', { products: result, csrfToken: req.query.csrfToken }); // Affichage page d'accueil avec filtre produit
-//     });
-// });
