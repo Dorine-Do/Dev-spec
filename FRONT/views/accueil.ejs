@@ -54,6 +54,10 @@
                                 <input type="hidden" name="category" value="<%= product.category %>">
                                 <input type="submit" class="btn btn-warning" value="Modifier le produit">
                             </form>
+                            <form action="/deleteProduit" method="post">
+                                <input type="hidden" name="id" value="<%= product.id %>">
+                                <input type="submit" class="btn btn-danger" value="Supprimer le produit">
+                            </form>
                         </div>
                     </div>
                 </div>
