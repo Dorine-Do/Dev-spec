@@ -83,149 +83,15 @@ app.get('/', async (req, res) => {
 
 });
 
-app.post('/filtre', async (req, res) => {
+app.use('/filtre', require('./routes/filtre/route'))
 
-    // console.log(req.body)
+app.use('/search', require('./routes/search/route'))
 
-    const category = req.body.category;
+app.use('/modifProduit', require('./routes/modifProduit/route'))
 
-    const fetchFilteredProducts = async () => {
-        const response = await fetch('http://localhost:5000/product-filtre', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ category })
-        });
-        const filteredProducts = await response.json();
+app.use('/modifProduitID', require('./routes/modifProduitID/route'))
 
-        return filteredProducts;
-    }
-
-    // console.log(await fetchFilteredProducts())
-
-     const fetchAllCategories = async () => {
-        const response = await fetch('http://localhost:5000/product-category', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-        const categories = await response.json();
-
-        const uniqueCategories = categories.filter((category, index, self) =>
-            index === self.findIndex((c) => (
-                c.category === category.category
-            ))
-        );
-
-        return uniqueCategories;
-    }
-
-
-    //console.log(await fetchFilteredProducts())
-
-    res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchFilteredProducts(), allCategories : await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
-})
-
-app.post('/search', async (req, res) => {
-    
-        const search = req.body.search;
-    
-        const fetchSearchedProducts = async () => {
-            const response = await fetch(`http://localhost:5000/products`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
-            const products = await response.json();
-    
-            const searchedProducts = products.filter(product => product.libelle.toLowerCase().includes(search.toLowerCase()));
-    
-            return searchedProducts;
-        }
-    
-        const fetchAllCategories = async () => {
-            const response = await fetch('http://localhost:5000/product-category', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
-            const categories = await response.json();
-    
-            const uniqueCategories = categories.filter((category, index, self) =>
-                index === self.findIndex((c) => (
-                    c.category === category.category
-                ))
-            );
-    
-            return uniqueCategories;
-        }
-    
-        res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchSearchedProducts(), allCategories : await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
-});
-
-app.post('/modifProduit', async (req, res) => {
-    res.render('modifProduit', {cspNonce: req.nonce, id: req.body.id, libelle: req.body.libelle, price: req.body.price, category: req.body.category, description: req.body.description, images: req.body.images}); // Affichage page d'accueil avec filtre produit
-})
-
-app.post('/modifProduitID', async (req, res) => {
-
-    const putProduct = async () => {
-        const response = await fetch(`http://localhost:5000/products/${req.body.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ id: req.body.id, libelle: req.body.libelle, price: req.body.price, category: req.body.category, description: req.body.description, images: req.body.images})
-        });
-
-        if (response.ok) {
-            console.log(await response.text());
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    if(await putProduct()) {
-        res.redirect('/');
-    } else {
-        res.send('Erreur lors de la modification du produit');
-    }
-})
-
-app.post('/deleteProduit', async (req, res) => {
-    const delProduct = async () => {
-        const response = await fetch(`http://localhost:5000/products/${req.body.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            console.log(await response.text());
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    if(await delProduct()) {
-        res.redirect('/');
-    } else {
-        res.send('Erreur lors de la suppression du produit');
-    }
-})
+app.use('/deleteProduit', require('./routes/delete/route'))
 
 app.get('/test', (req, res) => {
    
