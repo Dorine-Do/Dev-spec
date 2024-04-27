@@ -6,16 +6,16 @@ app.use(express.json())
 
 
 app.post('/', async (req, res) => {
-    const category = req.body.categorie;
+    const category = req.body.category
+
+    let query = ""
 
     if (category === "") {
-        res.status(200).send("Please select a category")
+        query = `SELECT * FROM Products`;
+    } else {
+        query = `SELECT * FROM Products WHERE category = '${category}'`;
     }
 
-    let query = 'SELECT * FROM Products';
-    if (category) {
-        query += ` WHERE category = '${category}'`;
-    }
     try {
         const connection = await connectDB()
         await connection.query(query)

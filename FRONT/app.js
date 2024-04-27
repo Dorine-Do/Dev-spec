@@ -66,11 +66,15 @@ app.get('/', async (req, res) => {
         });
         const categories = await response.json();
 
+        // console.log(categories)
+
         const uniqueCategories = categories.filter((category, index, self) =>
             index === self.findIndex((c) => (
-                c.id === category.id
+                c.category === category.category
             ))
         );
+
+        // console.log(uniqueCategories)
 
         return uniqueCategories;
     }
@@ -81,9 +85,7 @@ app.get('/', async (req, res) => {
 
 app.post('/filtre', async (req, res) => {
 
-    res.redirect('/');
-
-    console.log(req.body)
+    // console.log(req.body)
 
     const category = req.body.category;
 
@@ -101,8 +103,73 @@ app.post('/filtre', async (req, res) => {
         return filteredProducts;
     }
 
-    res.render('accueil', {cspNonce: req.nonce, filteredProducts: await fetchFilteredProducts()}); // Affichage page d'accueil avec filtre produit
+    // console.log(await fetchFilteredProducts())
+
+     const fetchAllCategories = async () => {
+        const response = await fetch('http://localhost:5000/product-category', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const categories = await response.json();
+
+        const uniqueCategories = categories.filter((category, index, self) =>
+            index === self.findIndex((c) => (
+                c.category === category.category
+            ))
+        );
+
+        return uniqueCategories;
+    }
+
+
+    //console.log(await fetchFilteredProducts())
+
+    res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchFilteredProducts(), allCategories : await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
 })
+
+app.post('/search', async (req, res) => {
+    
+        const search = req.body.search;
+    
+        const fetchSearchedProducts = async () => {
+            const response = await fetch(`http://localhost:5000/products`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            const products = await response.json();
+    
+            const searchedProducts = products.filter(product => product.libelle.toLowerCase().includes(search.toLowerCase()));
+    
+            return searchedProducts;
+        }
+    
+        const fetchAllCategories = async () => {
+            const response = await fetch('http://localhost:5000/product-category', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            const categories = await response.json();
+    
+            const uniqueCategories = categories.filter((category, index, self) =>
+                index === self.findIndex((c) => (
+                    c.category === category.category
+                ))
+            );
+    
+            return uniqueCategories;
+        }
+    
+        res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchSearchedProducts(), allCategories : await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
+});
 
 app.get('/test', (req, res) => {
    

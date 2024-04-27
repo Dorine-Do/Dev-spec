@@ -20,6 +20,11 @@
     <h3>Nos produits</h3>
     <!-- Formulaire de filtre -->
     <div class="container">
+        <form action="/search" method="post">
+            <label for="search">Rechercher un produit:</label>
+            <input type="text" id="search" name="search">
+            <input type="submit" value="Rechercher">
+        </form>
         <form action="/filtre" method="post"> 
             <label for="categorie">Filtrer par catégorie:</label>
             <select name="category" id="categorie">
@@ -30,7 +35,7 @@
             </select>
             <input type="submit" value="Filtrer">
         </form>
-        <div id="products" class="row">
+        <div id="allProducts" class="row">
             <% for (let product of allProducts) { %>
                 <div class="col-md-4">
                     <div class="card">
@@ -45,5 +50,6 @@
             <% } %>
         </div>
     </div>
+    
 </body>
 </html>
