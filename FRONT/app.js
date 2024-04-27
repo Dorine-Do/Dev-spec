@@ -3,6 +3,11 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
+const fetch = require('node-fetch')
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+
 app.set('view engine', 'ejs');
 
 app.listen(3000, 'localhost', () => {
@@ -36,15 +41,65 @@ app.use((req, res, next,) => {
 //     if (err) throw err;
 //     console.log('Connexion réussi');
 // });
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+
+    const fetchAllProducts = async () => {
+        const response = await fetch('http://localhost:5000/products', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const products = await response.json();
+
+        return products;
+    }
+
+    const fetchAllCategories = async () => {
+        const response = await fetch('http://localhost:5000/product-category', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const categories = await response.json();
+
+        // console.log(categories)
+
+        const uniqueCategories = categories.filter((category, index, self) =>
+            index === self.findIndex((c) => (
+                c.category === category.category
+            ))
+        );
+
+        // console.log(uniqueCategories)
+
+        return uniqueCategories;
+    }
    
-    res.render('index', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+    res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchAllProducts(), allCategories: await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
 
 });
 
+app.use('/filtre', require('./routes/filtre/route'))
+
+app.use('/search', require('./routes/search/route'))
+
+app.use('/modifProduit', require('./routes/modifProduit/route'))
+
+app.use('/modifProduitID', require('./routes/modifProduitID/route'))
+
+app.use('/deleteProduit', require('./routes/delete/route'))
+
+app.use('/addProduct', require('./routes/addProduct/route'))
+
+app.use('/addProductDB', require('./routes/addProductDB/route'))
+
 app.get('/test', (req, res) => {
    
-        res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+    res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
 
 });
 
