@@ -43,11 +43,11 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title"><%= product.libelle %></h4>
-                            <p class="card-text"><%= product.price %> €</p>
-                            <p class="card-text"><%= product.category %></p>
-                            <p class="card-text"><%= product.description %></p>
-                            <button id="btnAddProduct" type="button" class="btn btn-primary" data-productId = "<%= product.id %>">Ajouter au panier</button>
+                            <h4 class="card-title" ><%= product.libelle %></h4>
+                            <p class="card-text" ><%= product.price %> €</p>
+                            <p class="card-text" ><%= product.category %></p>
+                            <p class="card-text" ><%= product.description %></p>
+                            <button id="btnAddProduct" type="button" class="btn btn-primary add-to-cart" data-id = "<%= product.id %>" data-description = "<%= product.description %>" data-category = "<%= product.category %>" data-price = "<%= product.price %>" data-title = "<%= product.libelle %>">Ajouter au panier</button>
                             <form action="/modifProduit" method="post">
                                 <input type="hidden" name="id" value="<%= product.id %>">
                                 <input type="hidden" name="libelle" value="<%= product.libelle %>">
@@ -73,18 +73,37 @@
     document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('click', (event) => {
             const target = event.target;
-            console.log(target);
+            // console.log(target);
             if (target.matches('#btnPanier')) {
-                window.location.href = '/panier';
+                window.location.href = '/cart';
             } else if (target.matches('#btnConnection')) {
                 window.location.href = '/login';
             } else if (target.matches('#btnInscription')) {
                 window.location.href = '/register';
-            } else if (target.matches('#btnAddProduct')) {
-                const productId = target.getAttribute('data-productId');
-                window.location.href = '/ajouterAuPanier/' + productId;
             }
-        });          
+        });
+
+        const addToCart = (product) => {
+            let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
+            cart.push(product);
+            console.log(cart, product)
+            sessionStorage.setItem('cart', JSON.stringify(cart));
+        }
+        
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const product = {
+                    id: event.target.dataset.id,
+                    libelle: event.target.dataset.title,
+                    price: event.target.dataset.price,
+                    category: event.target.dataset.category,
+                    description: event.target.dataset.description
+                }
+                console.log(product)
+                addToCart(product)
+            });
+        });
+        
     });
 </script>
 </html>

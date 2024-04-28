@@ -83,6 +83,10 @@ app.get('/', async (req, res) => {
 
 });
 
+app.get('/cart', (req, res) => {
+    res.render('cart', { cspNonce: req.nonce });
+});
+
 app.get('/stats', async (req, res) => {   
     const rep = await fetch('http://localhost:5000/stats')
     const products = await rep.json();
