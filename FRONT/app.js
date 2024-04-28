@@ -1,20 +1,14 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
-
+const session = require('express-session')
 const fetch = require('node-fetch')
-
-const  LocalStorage = require('node-localstorage').LocalStorage,
-localStorage = new LocalStorage('./scratch');
-
-const brcypt = require('bcrypt');
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
 // Définie le engine template
 app.set('view engine', 'ejs');
-
+app.use(express.static('public'));
 
 app.listen(3000, 'localhost', () => {
     console.log('Server is running on port 3000');
@@ -33,13 +27,25 @@ app.use((req, res, next,) => {
     req.nonce = nonce;
 
     // Checked avec https://csp-evaluator.withgoogle.com/
-    res.appendHeader('Content-Security-Policy', `form-action 'self'; style-src 'nonce-${nonce}' https://cdn.jsdelivr.net; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net 'strict-dynamic' 'unsafe-inline'; object-src 'none'; base-uri 'self'; `)
+    res.appendHeader('Content-Security-Policy', `form-action 'self'; img-src 'self'; style-src 'nonce-${nonce}' https://cdn.jsdelivr.net; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net 'strict-dynamic' 'unsafe-inline'; object-src 'none'; base-uri 'self'; `)
     
     // Chrome ?
     // res.appendHeader('Reporting-Endpoints', 'nom-groupe-csp="votre-url"');
 
     next();
 })
+
+// SESION
+app.use(session({
+    secret: 'secret_key',
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use((req, res, next) => {
+    res.locals.user = req.session.email;
+    next();
+});
 
 
 //RENDER --------------------------------------------------------------------------------------------------------------------------
@@ -86,6 +92,10 @@ app.get('/', async (req, res) => {
    
     res.render('accueil', {cspNonce: req.nonce, allProducts: allProducts, allCategories: allCategories}); // Affichage page d'accueil avec filtre produit
 
+});
+
+app.get('/cart', (req, res) => {
+    res.render('cart', { cspNonce: req.nonce });
 });
 
 app.get('/stats', async (req, res) => {   
@@ -135,17 +145,17 @@ app.use('/inscription', require('./routes/inscription/route'));
 // body-parser pour récup les données du formulaire
 // app.use(bodyParser.urlencoded({ extended: true }));
 
-
-
-
-
-
-
-
 //DECONNEXION//
 //----------------------------------------------------------//
 
 app.get('/deconnexion', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error destroying session:', err);
+        } else {
+            res.redirect('/');
+        }
+    });
     // Delete token CSRF
     res.redirect('/accueil');
 });

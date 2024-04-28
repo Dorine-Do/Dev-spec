@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-
+const bcrypt = require('bcrypt');
 app.use(express.json())
 
 app.get('/', (req, res) => {
@@ -31,7 +31,7 @@ app.post('/', async (req, res) => {
                 res.send("Email déjà utilisé");
             }
         } else {
-            const hashedPassword = brcypt.hashSync(password, 10);
+            const hashedPassword = bcrypt.hashSync(password, 10);
             const addUser = async () => {
                 const response = await fetch('http://localhost:5000/register', {
                     method: 'POST',

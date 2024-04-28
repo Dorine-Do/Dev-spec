@@ -26,6 +26,7 @@ app.post('/', async (req, res) => {
 
     const user = await loginUser();
     if (user.message === 'User logged in') {
+        req.session.email = email;
         res.redirect('/');
     } else {
         res.send("Email ou mot de passe incorrect");

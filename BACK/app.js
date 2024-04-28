@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
 
 const connectDB = require('./utils/connectDB')
@@ -18,7 +17,7 @@ const corsOptions = {
     origin: 'http://localhost:3000',
     methods: ['POST', 'GET','PUT','DELETE']
   };
-
+  
 //--------------------------------------------------------------------------------------------------------------------------
 app.use('/stats',cors({origin:'*'}), require('./routes/stats/route'))
 
