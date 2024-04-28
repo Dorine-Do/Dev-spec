@@ -156,7 +156,5 @@ app.get('/deconnexion', (req, res) => {
             res.redirect('/');
         }
     });
-    // Delete token CSRF
-    res.redirect('/accueil');
 });
 
