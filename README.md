@@ -42,6 +42,30 @@ connecté.
 - Panier : Consultez les produits ajoutés à votre panier.
 - Statistiques : Accédez aux statistiques via l'URL localhost:3000/stats
 
+_Pour le CSRF, on souhaitais intaller la librairie : csurf._
+
+```
+app.use(csrf()); 
+res.locals.csrfToken = req.csrfToken()
+app.use((req, res, next) => {
+    // subString 2 car sinon pas assez complexe
+    const nonce = (Math.random() + 1).toString(36).substring(2);
+    req.nonce = nonce;
+
+    res.locals.csrfToken = req.csrfToken()
+    // Checked avec https://csp-evaluator.withgoogle.com/
+    res.appendHeader('Content-Security-Policy', form-action 'self'; img-src 'self'; style-src 'nonce-${nonce}' https://cdn.jsdelivr.net; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net 'strict-dynamic' 'unsafe-inline'; object-src 'none'; base-uri 'self'; )
+
+    // Chrome ?
+    // res.appendHeader('Reporting-Endpoints', 'nom-groupe-csp="votre-url"');
+
+    next();
+})
+```
+_On devait mettre le code ci-dessous sur toutes les routes_
+```csrfToken: req.csrfToken()```
+
+
 Dorine
 Baptiste
 Antonin
