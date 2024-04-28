@@ -1,9 +1,13 @@
 const express = require('express');
-// const mysql = require('mysql');
 const app = express();
 const bodyParser = require('body-parser');
 
 const fetch = require('node-fetch')
+
+const  LocalStorage = require('node-localstorage').LocalStorage,
+localStorage = new LocalStorage('./scratch');
+
+const brcypt = require('bcrypt');
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
@@ -84,51 +88,24 @@ app.use('/addProduct', require('./routes/addProduct/route'))
 
 app.use('/addProductDB', require('./routes/addProductDB/route'))
 
-
-//INSCRIPTION//
-//----------------------------------------------------------//
-
-// body-parser pour récup les données du formulaire
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.post('/inscription', (req, res) => {
-    const { prenom, nom, email, phone, password, confirm_password } = req.body;
-    if (password !== confirm_password) {
-        res.send("Les mots de passe ne correspondent pas");
-    } else {
-        // Insérer les données dans la BDD
-        const user = { prenom, nom, email, phone, password };
-        connection.query('INSERT INTO users SET ?', user, (err, result) => {
-            if (err) throw err;
-            console.log('Utilisateur inséré avec succès');
-            res.send('Inscription réussie !');
-        });
-    }
-});
-
+app.use('/addCart', require('./routes/addCart/route'))
 
 //CONNEXION//
 //----------------------------------------------------------//
 
-app.post('/connexion', (req, res) => {
+app.use('/connexion', require('./routes/connexion/route'));
+
+//INSCRIPTION//
+//----------------------------------------------------------//
+
+app.use('/inscription', require('./routes/inscription/route'));
+
+// body-parser pour récup les données du formulaire
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
-    
-    const { email, password } = req.body;
-    // Verif si user exist ou pas
-    connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], (err, result) => {
-        if (err) throw err;
-        if (result.length > 0) {
-            // Génération token random
-            const csrfToken = Math.random().toString(36).substring(2);
-            // Redirection  automatique si token valid
-            res.redirect(`/accueil?csrfToken=${csrfToken}`);
-        } else {
-            // Utilisateur non trouvé, afficher un message d'erreur
-            res.send("Email ou mot de passe incorrect");
-        }
-    });
-});
+
+
 
 
 

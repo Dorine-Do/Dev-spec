@@ -26,6 +26,8 @@ app.use('/product-category', require('./routes/product-category/route'))
 
 app.use('/product-filtre', require('./routes/product-filtre/route'))
 
+app.use('/user', require('./routes/user/route'))
+
 // app.use('/details_commands', require('./routes/details_commands/route'))
 
 app.get('/', async (req, res) => {

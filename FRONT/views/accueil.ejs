@@ -47,7 +47,9 @@
                             <p class="card-text"><%= product.price %> €</p>
                             <p class="card-text"><%= product.category %></p>
                             <p class="card-text"><%= product.description %></p>
-                            <button type="button" class="btn btn-primary" onclick="window.location.href='/ajouterAuPanier/<%= product.id %>'">Ajouter au panier</button>
+                            <form action="/addCart" method="post">
+                                <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                            </form>
                             <form action="/modifProduit" method="post">
                                 <input type="hidden" name="id" value="<%= product.id %>">
                                 <input type="hidden" name="libelle" value="<%= product.libelle %>">
