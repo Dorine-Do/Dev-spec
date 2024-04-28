@@ -12,13 +12,17 @@ const brcypt = require('bcrypt');
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
+// Définie le engine template
 app.set('view engine', 'ejs');
+
 
 app.listen(3000, 'localhost', () => {
     console.log('Server is running on port 3000');
 });
 
-// CSP css / js / form
+// middleware --------------------------------------------------------------------------------------------------------------------------
+// CSP 
+// css / js / form
 // Le navigateur va check si les forms proviennent bien de nous
 // Toutes les balises style/script inline, script doivent avoir en attribut 'nonce' avec en value la string générée avec Math.random
 // Si vous voulez faire du style inline sur une page, dans son 'render' en back il faudra rajouter : cspNonce = req.nonce
@@ -27,10 +31,18 @@ app.use((req, res, next,) => {
     // subString 2 car sinon pas assez complexe
     const nonce = (Math.random() + 1).toString(36).substring(2);
     req.nonce = nonce;
+
     // Checked avec https://csp-evaluator.withgoogle.com/
     res.appendHeader('Content-Security-Policy', `form-action 'self'; style-src 'nonce-${nonce}' https://cdn.jsdelivr.net; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net 'strict-dynamic' 'unsafe-inline'; object-src 'none'; base-uri 'self'; `)
+    
+    // Chrome ?
+    // res.appendHeader('Reporting-Endpoints', 'nom-groupe-csp="votre-url"');
+
     next();
 })
+
+
+//RENDER --------------------------------------------------------------------------------------------------------------------------
 
 app.get('/', async (req, res) => {
 
@@ -69,10 +81,30 @@ app.get('/', async (req, res) => {
 
         return uniqueCategories;
     }
+    const allProducts = await fetchAllProducts()
+    const allCategories = await fetchAllCategories()
    
-    res.render('accueil', {cspNonce: req.nonce, allProducts: await fetchAllProducts(), allCategories: await fetchAllCategories()}); // Affichage page d'accueil avec filtre produit
+    res.render('accueil', {cspNonce: req.nonce, allProducts: allProducts, allCategories: allCategories}); // Affichage page d'accueil avec filtre produit
 
 });
+
+app.get('/stats', async (req, res) => {   
+    const rep = await fetch('http://localhost:5000/stats')
+    const products = await rep.json();
+    res.status(200).json(products)
+
+});
+
+
+app.get('/test', async (req, res) => {
+    const response = await fetch('http://localhost:5000/product-category')
+    res.render('test', {
+        cspNonce: req.nonce
+    });
+
+});
+
+// ACTIONS ---------------------------------------------------------------------
 
 app.use('/filtre', require('./routes/filtre/route'))
 
@@ -101,7 +133,7 @@ app.use('/connexion', require('./routes/connexion/route'));
 app.use('/inscription', require('./routes/inscription/route'));
 
 // body-parser pour récup les données du formulaire
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 
 

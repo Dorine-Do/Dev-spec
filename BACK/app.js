@@ -1,18 +1,30 @@
 const express = require('express');
+const cors = require('cors');
+
 const app = express();
+
 const connectDB = require('./utils/connectDB')
 
-// MIDDLEWAR pour bloquer les autres ip, a mettre a la fin -->
-// TODO : Ajouter condition si page stastique
-// app.use((req, res, next) => {
-//     const clientIp = req.connection.remoteAddress.includes('::') ? `[${req.connection.remoteAddress}]` : req.connection.remoteAddress;
-//     if (clientIp === 'localhost' || clientIp === '127.0.0.1' || clientIp === '::1') {
-//         next();
-//     } else {
-//         res.status(403).send('Access denied');
-//     }
-// });
+const connection = connectDB()
+.then(()=>{console.log('Connected')})
+.catch((error)=>{console.log('Failed to connect to the database: ' + error)})
 
+
+// middleware --------------------------------------------------------------------------------------------------------------------------
+// CORS 
+const corsOptions = {
+    // origin: Configures the Access-Control-Allow-Origin 
+    // methods: Configures the Access-Control-Allow-Methods
+    origin: 'http://localhost:3000',
+    methods: ['POST', 'GET','PUT','DELETE']
+  };
+
+//--------------------------------------------------------------------------------------------------------------------------
+app.use('/stats',cors({origin:'*'}), require('./routes/stats/route'))
+
+app.use(cors(corsOptions), express.json());
+
+app.use('/test', require('./routes/test/route'))
 
 app.use('/register', require('./routes/register/route'))
 
@@ -30,15 +42,6 @@ app.use('/user', require('./routes/user/route'))
 
 // app.use('/details_commands', require('./routes/details_commands/route'))
 
-app.get('/', async (req, res) => {
-    res.send('API BACK')
-    try {
-        await connectDB()
-        console.log('Connected')
-    } catch (error) {
-        console.log('Failed to connect to the database: ' + error)
-    }
-})
 
 app.listen(5000, 'localhost', () => {
     console.log('Server is running on port 5000');
