@@ -1,8 +1,11 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const { response } = require('../BACK/routes/register/route');
-const fetch = require('node-fetch');
+
+const fetch = require('node-fetch')
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
 
 // Définie le engine template
 app.set('view engine', 'ejs');
@@ -34,26 +37,84 @@ app.use((req, res, next,) => {
 })
 
 
+//RENDER --------------------------------------------------------------------------------------------------------------------------
 
-// Routes ----------------------------------------------------------------------------------------------------------------------------
+app.get('/', async (req, res) => {
 
-app.get('/', (req, res) => {
-    res.render('accueil', {cspNonce: req.nonce});
+    const fetchAllProducts = async () => {
+        const response = await fetch('http://localhost:5000/products', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const products = await response.json();
+
+        return products;
+    }
+
+    const fetchAllCategories = async () => {
+        const response = await fetch('http://localhost:5000/product-category', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const categories = await response.json();
+
+        // console.log(categories)
+
+        const uniqueCategories = categories.filter((category, index, self) =>
+            index === self.findIndex((c) => (
+                c.category === category.category
+            ))
+        );
+
+        // console.log(uniqueCategories)
+
+        return uniqueCategories;
+    }
+    const allProducts = await fetchAllProducts()
+    const allCategories = await fetchAllCategories()
+   
+    res.render('accueil', {cspNonce: req.nonce, allProducts: allProducts, allCategories: allCategories}); // Affichage page d'accueil avec filtre produit
+
 });
 
 app.get('/stats', async (req, res) => {   
     const rep = await fetch('http://localhost:5000/stats')
     const products = await rep.json();
-    res.status(500).json(products)
+    res.status(200).json(products)
 
 });
 
-app.get('/test', (req, res) => {
+
+app.get('/test', async (req, res) => {
+    const response = await fetch('http://localhost:5000/product-category')
     res.render('test', {
         cspNonce: req.nonce
     });
 
 });
+
+// ACTIONS ---------------------------------------------------------------------
+
+app.use('/filtre', require('./routes/filtre/route'))
+
+app.use('/search', require('./routes/search/route'))
+
+app.use('/modifProduit', require('./routes/modifProduit/route'))
+
+app.use('/modifProduitID', require('./routes/modifProduitID/route'))
+
+app.use('/deleteProduit', require('./routes/delete/route'))
+
+app.use('/addProduct', require('./routes/addProduct/route'))
+
+app.use('/addProductDB', require('./routes/addProductDB/route'))
+
 
 //INSCRIPTION//
 //----------------------------------------------------------//
@@ -111,19 +172,3 @@ app.get('/deconnexion', (req, res) => {
     res.redirect('/accueil');
 });
 
-
-
-//FILTRE PRODUIT//
-//----------------------------------------------------------//
-
-// app.get('/filtrer', (req, res) => {
-//     const categorie = req.query.categorie;
-//     let sql = 'SELECT * FROM produits';
-//     if (categorie) {
-//         sql += ` WHERE categorie = '${categorie}'`;
-//     }
-//     connection.query(sql, (err, result) => {
-//         if (err) throw err;
-//         res.render('accueil', { products: result, csrfToken: req.query.csrfToken }); // Affichage page d'accueil avec filtre produit
-//     });
-// });
