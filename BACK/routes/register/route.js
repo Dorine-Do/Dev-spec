@@ -19,8 +19,6 @@ app.post('/', async (req, res) => {
         isAdmin: req.body.isAdmin
     }
 
-    res.send('Received user data: ' + JSON.stringify(userData))
-
     // Insert user in the database
     try {
         const connection = await connectDB()
@@ -29,8 +27,10 @@ app.post('/', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `, [userData.firstName, userData.lastName, userData.email, userData.password, userData.address, userData.phone, userData.isAdmin])
         console.log('User inserted in the database')
+        res.status(201).json({ message: 'User inserted in the database'})
     } catch (error) {
         console.error('Failed to insert user in the database: ' + error)
+        res.status(500).json({ message: 'Failed to insert user in the database'})
     }
 })
 

@@ -1,3 +1,4 @@
+const {createProducts} = require('./createBD');
 
 const checkDB = async (connection) => {
 
@@ -50,10 +51,13 @@ const checkDB = async (connection) => {
                         description TEXT,
                         price FLOAT NOT NULL,
                         images VARCHAR(255) NOT NULL,
-                        category VARCHAR(255) NOT NULL
+                        category ENUM('Viennoiserie','Biscuit','Diet') NOT NULL
                     );
                 `);
                 console.log('Table Products created')
+
+                await createProducts(connection) 
+
             }
 
             const [details_commands] = await connection.query("SHOW TABLES LIKE 'Details_Commands'");

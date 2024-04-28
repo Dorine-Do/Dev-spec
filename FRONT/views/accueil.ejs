@@ -10,9 +10,9 @@
 <body>
 
     <nav>
-        <button type="button" class="btn btn-primary" onclick="window.location.href='/panier'">Panier</button>
-        <button type="button" class="btn btn-primary" onclick="window.location.href='/login'">Connexion</button>
-        <button type="button" class="btn btn-primary" onclick="window.location.href='/register'">Inscription</button>
+        <button id="btnPanier" type="button" class="btn btn-primary" >Panier</button>
+        <button id="btnConnection" type="button" class="btn btn-primary" >Connexion</button>
+        <button id="btnInscription" type="button" class="btn btn-primary" >Inscription</button>
     </nav>
 
     <h1>Accueil</h1>
@@ -47,7 +47,7 @@
                             <p class="card-text"><%= product.price %> €</p>
                             <p class="card-text"><%= product.category %></p>
                             <p class="card-text"><%= product.description %></p>
-                            <button type="button" class="btn btn-primary" onclick="window.location.href='/ajouterAuPanier/<%= product.id %>'">Ajouter au panier</button>
+                            <button id="btnAddProduct" type="button" class="btn btn-primary" data-productId = "<%= product.id %>">Ajouter au panier</button>
                             <form action="/modifProduit" method="post">
                                 <input type="hidden" name="id" value="<%= product.id %>">
                                 <input type="hidden" name="libelle" value="<%= product.libelle %>">
@@ -69,4 +69,22 @@
     </div>
     
 </body>
+<script nonce="<%- cspNonce %>">
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('click', (event) => {
+            const target = event.target;
+            console.log(target);
+            if (target.matches('#btnPanier')) {
+                window.location.href = '/panier';
+            } else if (target.matches('#btnConnection')) {
+                window.location.href = '/login';
+            } else if (target.matches('#btnInscription')) {
+                window.location.href = '/register';
+            } else if (target.matches('#btnAddProduct')) {
+                const productId = target.getAttribute('data-productId');
+                window.location.href = '/ajouterAuPanier/' + productId;
+            }
+        });          
+    });
+</script>
 </html>

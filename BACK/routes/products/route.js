@@ -43,14 +43,20 @@ app.get('/:id', async (req, res) => {
 })
 
 app.post('/', async (req, res) => {
+    const productData = {
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        images: req.body.images
+    }
 
     try {
         const connection = await connectDB()
         await connection.query(`
-            INSERT INTO Products (libelle, description, price, images, category)
-            VALUES (?, ?, ?, ?, ?)
-        `, [req.body.libelle, req.body.description, req.body.price, req.body.images, req.body.category])
-        res.status(200).json({ message: 'Product updated in the database' });
+            INSERT INTO Products (name, description, price, images)
+            VALUES (?, ?, ?, ?)
+        `, [productData.name, productData.description, productData.price, productData.images])
+        res.status(201).send('Product inserted in the database')
     } catch (error) {
         console.error('Failed to insert product in the database: ' + error)
         res.status(500).send('Failed to insert product in the database')
@@ -58,15 +64,21 @@ app.post('/', async (req, res) => {
 })
 
 app.put('/:id', async (req, res) => {
+    const productData = {
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        images: req.body.images
+    }
 
     try {
         const connection = await connectDB()
         await connection.query(`
             UPDATE Products
-            SET libelle = ?, description = ?, price = ?, images = ?, category = ?
+            SET name = ?, description = ?, price = ?, images = ?
             WHERE id = ?
-        `, [req.body.libelle, req.body.description, req.body.price, req.body.images, req.body.category ,req.body.id])
-        res.status(200).json({ message: 'Product updated in the database' });
+        `, [productData.name, productData.description, productData.price, productData.images, req.params.id])
+        res.status(200).send('Product updated in the database')
     } catch (error) {
         console.error('Failed to update product in the database: ' + error)
         res.status(500).send('Failed to update product in the database')
