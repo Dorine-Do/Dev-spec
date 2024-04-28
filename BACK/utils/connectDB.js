@@ -1,14 +1,16 @@
-//const mysql = require('mysql');
+// const mysql = require('mysql');
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 const checkDB = require('./checkDB');
 
 dotenv.config()
 const connectDB = async () => {
+
     const connection = await mysql.createConnection({
         host: 'localhost',
         user: 'root',
-        password: '',
+        password: 'root',
+        database: 'SnackKing',
         multipleStatements: true
     });
 
@@ -21,6 +23,7 @@ const connectDB = async () => {
     }
 
     return connection;
+
 }
 
 module.exports = connectDB

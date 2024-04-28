@@ -1,5 +1,4 @@
 const express = require('express');
-// const mysql = require('mysql');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
@@ -8,11 +7,27 @@ const jwt = require ('jsonwebtoken');
 
 app.set('view engine', 'ejs');
 
+const fetch = require('node-fetch')
+
+const  LocalStorage = require('node-localstorage').LocalStorage,
+localStorage = new LocalStorage('./scratch');
+
+const brcypt = require('bcrypt');
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+
+// Définie le engine template
+app.set('view engine', 'ejs');
+
+
 app.listen(3000, 'localhost', () => {
     console.log('Server is running on port 3000');
 });
 
-// CSP css / js / form
+// middleware --------------------------------------------------------------------------------------------------------------------------
+// CSP 
+// css / js / form
 // Le navigateur va check si les forms proviennent bien de nous
 // Toutes les balises style/script inline, script doivent avoir en attribut 'nonce' avec en value la string générée avec Math.random
 // Si vous voulez faire du style inline sur une page, dans son 'render' en back il faudra rajouter : cspNonce = req.nonce
@@ -21,78 +36,113 @@ app.use((req, res, next,) => {
     // subString 2 car sinon pas assez complexe
     const nonce = (Math.random() + 1).toString(36).substring(2);
     req.nonce = nonce;
+
     // Checked avec https://csp-evaluator.withgoogle.com/
     res.appendHeader('Content-Security-Policy', `form-action 'self'; style-src 'nonce-${nonce}' https://cdn.jsdelivr.net; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net 'strict-dynamic' 'unsafe-inline'; object-src 'none'; base-uri 'self'; `)
+    
+    // Chrome ?
+    // res.appendHeader('Reporting-Endpoints', 'nom-groupe-csp="votre-url"');
+
     next();
 })
 
-// // Configuration de la base de données
-// const connection = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'root',
-//     password: 'password',
-//     database: 'database'
-// });
 
-// // Connexion à la base de données
-// connection.connect((err) => {
-//     if (err) throw err;
-//     console.log('Connexion réussi');
-// });
-app.get('/', (req, res) => {
+//RENDER --------------------------------------------------------------------------------------------------------------------------
+
+app.get('/', async (req, res) => {
+
+    const fetchAllProducts = async () => {
+        const response = await fetch('http://localhost:5000/products', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const products = await response.json();
+
+        return products;
+    }
+
+    const fetchAllCategories = async () => {
+        const response = await fetch('http://localhost:5000/product-category', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const categories = await response.json();
+
+        // console.log(categories)
+
+        const uniqueCategories = categories.filter((category, index, self) =>
+            index === self.findIndex((c) => (
+                c.category === category.category
+            ))
+        );
+
+        // console.log(uniqueCategories)
+
+        return uniqueCategories;
+    }
+    const allProducts = await fetchAllProducts()
+    const allCategories = await fetchAllCategories()
    
-    res.render('index', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+    res.render('accueil', {cspNonce: req.nonce, allProducts: allProducts, allCategories: allCategories}); // Affichage page d'accueil avec filtre produit
 
 });
 
-app.get('/test', (req, res) => {
-   
-        res.render('test', {cspNonce: req.nonce}); // Affichage page d'accueil avec filtre produit
+app.get('/stats', async (req, res) => {   
+    const rep = await fetch('http://localhost:5000/stats')
+    const products = await rep.json();
+    res.status(200).json(products)
 
 });
+
+
+app.get('/test', async (req, res) => {
+    const response = await fetch('http://localhost:5000/product-category')
+    res.render('test', {
+        cspNonce: req.nonce
+    });
+
+});
+
+// ACTIONS ---------------------------------------------------------------------
+
+app.use('/filtre', require('./routes/filtre/route'))
+
+app.use('/search', require('./routes/search/route'))
+
+app.use('/modifProduit', require('./routes/modifProduit/route'))
+
+app.use('/modifProduitID', require('./routes/modifProduitID/route'))
+
+app.use('/deleteProduit', require('./routes/delete/route'))
+
+app.use('/addProduct', require('./routes/addProduct/route'))
+
+app.use('/addProductDB', require('./routes/addProductDB/route'))
+
+app.use('/addCart', require('./routes/addCart/route'))
+
+//CONNEXION//
+//----------------------------------------------------------//
+
+app.use('/connexion', require('./routes/connexion/route'));
 
 //INSCRIPTION//
 //----------------------------------------------------------//
 
+app.use('/inscription', require('./routes/inscription/route'));
+
 // body-parser pour récup les données du formulaire
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.post('/inscription', (req, res) => {
-    const { prenom, nom, email, phone, password, confirm_password } = req.body;
-    if (password !== confirm_password) {
-        res.send("Les mots de passe ne correspondent pas");
-    } else {
-        // Insérer les données dans la BDD
-        const user = { prenom, nom, email, phone, password };
-        connection.query('INSERT INTO users SET ?', user, (err, result) => {
-            if (err) throw err;
-            console.log('Utilisateur inséré avec succès');
-            res.send('Inscription réussie !');
-        });
-    }
-});
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 
-//CONNEXION//
-//----------------------------------------------------------//
-app.post('/connexion', (req, res) => {
-    const { email, password } = req.body;
-    // Vérification si l'utilisateur existe ou non
-    connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], (err, result) => {
-        if (err) throw err;
-        if (result.length > 0) {
-            const user = result[0];
-            // Génération du token JWT
-            const token = generateToken({ email: user.email });
-            // Token JWT dans un cookie de session
-            res.cookie('jwt', token, { httpOnly: true });
-            // Redirection vers la page d'accueil
-            res.redirect('/accueil');
-        } else {
-            res.send("Email ou mot de passe incorrect");
-        }
-    });
-});
+
+
 
 
 //COOKIE CSRF//
@@ -136,19 +186,3 @@ app.get('/deconnexion', (req, res) => {
     res.redirect('/accueil');
 });
 
-
-
-//FILTRE PRODUIT//
-//----------------------------------------------------------//
-
-// app.get('/filtrer', (req, res) => {
-//     const categorie = req.query.categorie;
-//     let sql = 'SELECT * FROM produits';
-//     if (categorie) {
-//         sql += ` WHERE categorie = '${categorie}'`;
-//     }
-//     connection.query(sql, (err, result) => {
-//         if (err) throw err;
-//         res.render('accueil', { products: result, csrfToken: req.query.csrfToken }); // Affichage page d'accueil avec filtre produit
-//     });
-// });

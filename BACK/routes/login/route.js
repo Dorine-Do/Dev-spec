@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const connectDB = require('../../utils/connectDB')
-
+const bcrypt = require('bcrypt')
 app.use(express.json())
 
 app.get('/', (req, res) => {
@@ -19,10 +19,15 @@ app.post('/', async (req, res) => {
     try {
         const connection = await connectDB()
         const [users] = await connection.query(`
-            SELECT * FROM User WHERE email = ? AND password = ?
+            SELECT * FROM User WHERE email = ?
         `, [userData.email, userData.password])
         if (users.length > 0) {
-            res.status(200).send('User found')
+            const match = await bcrypt.compare(userData.password, users[0].password)
+            if (match) {
+                res.status(200).json({ message: 'User logged in'})
+            } else {
+                res.status(401).json({ message: 'Invalid password'})
+            }
         } else {
             res.status(404).send('User not found')
         }
